@@ -118,7 +118,7 @@ module Sunspot
         def set_error!(error, retry_interval = nil)
           self.attempts += 1
           self.run_at = (retry_interval * attempts).seconds.from_now.utc if retry_interval
-          self.error = "#{error.class.name}: #{error.message}\n#{error.backtrace.join("\n")[0, 4000]}"
+          self.error = "#{error.class.name}: #{error.message}\n#{error.backtrace.join("\n")}"[0, 4000]
           self.lock = nil
           begin
             save!
