@@ -20,17 +20,20 @@ module Sunspot
       # Otherwise, any entries that generated errors will be updated with the error messages and
       # set to be processed again in the future.
       def submit!
+        require 'timeout'
         Entry.load_all_records(entries)
         clear_processed(entries)
         begin
           # First try submitting the entries in a batch since that's the most efficient.
           # If there are errors, try each entry individually in case there's a bad document.
-          session.batch do
-            entries.each do |entry|
-              submit_entry(entry)
+          Timeout::timeout(20) do
+            session.batch do
+              entries.each do |entry|
+                submit_entry(entry)
+              end
             end
+            commit!
           end
-          commit!
         rescue Exception => e
           @delete_entries.clear
           entries.each{|entry| entry.processed = false}
@@ -96,12 +99,15 @@ module Sunspot
 
       # Send an entry to Solr doing an update or delete as necessary.
       def submit_entry(entry)
+        require 'timeout'
         log_entry_error(entry) do
-          if entry.is_delete?
-            session.remove_by_id(entry.record_class_name, entry.record_id)
-          else
-            record = entry.record
-            session.index(record) if record
+          Timeout::timeout(5) do
+            if entry.is_delete?
+              session.remove_by_id(entry.record_class_name, entry.record_id)
+            else
+              record = entry.record
+              session.index(record) if record
+            end
           end
         end
       end
