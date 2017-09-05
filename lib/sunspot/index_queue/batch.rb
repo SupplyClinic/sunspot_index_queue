@@ -101,7 +101,7 @@ module Sunspot
       def submit_entry(entry)
         require 'timeout'
         log_entry_error(entry) do
-          Timeout::timeout(5) do
+          Timeout::timeout(10) do
             if entry.is_delete?
               session.remove_by_id(entry.record_class_name, entry.record_id)
             else

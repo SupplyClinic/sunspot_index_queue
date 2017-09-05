@@ -123,9 +123,9 @@ module Sunspot
           begin
             save!
           rescue => e
-            if logger
-              logger.warn(error)
-              logger.warn(e)
+            if error
+              puts error
+              puts e
             end
           end
         end
@@ -135,7 +135,7 @@ module Sunspot
           begin
             update_attributes!(:attempts => 0, :error => nil, :lock => nil, :run_at => Time.now.utc)
           rescue => e
-            logger.warn(e)
+            puts e
           end
         end
       end
